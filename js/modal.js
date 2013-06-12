@@ -10,7 +10,6 @@ var Modal = {
 		this.makeDraggable()
 		this.open()
 		this.addListeners()
-		console.log(settings.content)
 	}
 
 	, create: function(){

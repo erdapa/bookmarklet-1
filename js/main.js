@@ -1,73 +1,46 @@
-initialize()
+!function(){
 
-// initialize functions
-function initialize(){
-  addJquery()
-  addModalCss()
-  addCustomCss()
-}
+  var baseUrl = document.querySelector('[data-cf-bm]')
+    .getAttribute('data-base-url');
 
-// Add JQuery if it doesn't already exist
-function addJquery(){
-  if (typeof JQuery === "undefined") {
-    var done = false
-    var jqueryScript = document.createElement('script')
-    // jqueryScript.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js'
-    jqueryScript.src = '/Users/ryan/Desktop/bookmarklet/js/jquery.js'
-    jqueryScript.onload = jqueryScript.onreadystatechange = function(){
-      if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")){
-        done = true
-        addJqueryUi()
+  initialize()
+
+  function initialize(){
+    if (typeof jQuery !== "undefined") { initializeAfterJQuery() }
+    else {
+      var jQueryUrl = baseUrl + 'js/jquery.js'
+      loadScript(jQueryUrl, initializeAfterJQuery)
+    }
+  }
+
+  function initializeAfterJQuery() {
+    loadCss(baseUrl + 'css/modal.css')
+    loadScript(baseUrl + 'js/jquery_draggable.js', function(){
+      loadScript(baseUrl + 'js/modal.js', function(){
+        Modal.init({content: 'Content goes here </br></br> Current page url: </br>' + document.baseURI})
+      })
+    })
+  }
+
+  function loadScript(url, callback) {
+    var loaded = false
+    var scriptElement = document.createElement('script')
+    scriptElement.src = url
+    scriptElement.onload = scriptElement.onreadystatechange = function(){
+      var isLoaded = !loaded && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")
+      if (isLoaded) {
+        loaded = true
+        callback()
       }
     }
-    document.getElementsByTagName('head')[0].appendChild(jqueryScript)
+    document.body.appendChild(scriptElement)
   }
-  else {
-    addJqueryUi()
+
+  function loadCss(url){
+    var styleElement = document.createElement('link')
+    styleElement.rel  = "stylesheet"
+    styleElement.href = url
+    document.getElementsByTagName('head')[0].appendChild(styleElement)
   }
-}
 
-function addJqueryUi(){
-  var done = false
-  var jqueryUi = document.createElement('script')
-  jqueryUi.src= '/Users/ryan/Desktop/bookmarklet/js/jquery_draggable.js'
-  jqueryUi.onload = jqueryUi.onreadystatechange = function(){
-    if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")){
-      done = true
-      addModalJs()
-    }
-  }
-  document.getElementsByTagName('head')[0].appendChild(jqueryUi)
-}
-
-// Add modal CSS
-function addModalCss(){
-  var modalCss=document.createElement('link')
-  modalCss.rel="stylesheet"
-  modalCss.href='/Users/ryan/Desktop/bookmarklet/css/modal.css'
-  document.getElementsByTagName('head')[0].appendChild(modalCss)
-}
-
-// Add modal JS
-function addModalJs(){
-  var done = false
-  var modalJs = document.createElement('script')
-  modalJs.src = '/Users/ryan/Desktop/bookmarklet/js/modal.js'
-  modalJs.onload = modalJs.onreadystatechange = function(){
-    if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")){
-      done = true
-      runModal()
-    }
-  }
-  document.getElementsByTagName('head')[0].appendChild(modalJs)
-}
-
-// calls to modal.js file
-function runModal(){
-  Modal.init({content: 'Content goes here'})
-}
-
-//// The google way to insert script tags and link tags
-//// used because some webpages do not have a <head> element
-// var s = document.getElementsByTagName('script')[0];
-// s.parentNode.insertBefore(yourNewElement, s);
+}.call(this)
